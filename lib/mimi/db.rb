@@ -1,6 +1,7 @@
 require 'mimi/core'
 require 'active_record'
 require 'mini_record'
+require 'with_advisory_lock'
 
 module Mimi
   module DB
@@ -64,6 +65,7 @@ module Mimi
       super
       ActiveRecord::Base.logger = logger
       ActiveRecord::Base.configurations = { 'default' => active_record_config }
+      ActiveRecord::Base.raise_in_transactional_callbacks = true
     end
 
     def self.logger
