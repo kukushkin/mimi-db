@@ -1,7 +1,6 @@
 require 'mimi/core'
 require 'active_record'
 require 'mini_record'
-require 'with_advisory_lock'
 
 module Mimi
   module DB
@@ -92,32 +91,10 @@ module Mimi
         reaping_frequency: 15
       }.stringify_keys
     end
-
-    def self.models
-      ActiveRecord::Base.descendants
-    end
-
-    def self.migrate_schema!
-      models.each(&:auto_upgrade!)
-    end
-
-    def self.create!
-      ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-      ActiveRecord::Tasks::DatabaseTasks.create(active_record_config)
-    end
-
-    def self.drop!
-      ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-      ActiveRecord::Tasks::DatabaseTasks.drop(active_record_config)
-    end
-
-    def self.clear!
-      ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-      ActiveRecord::Tasks::DatabaseTasks.purge(active_record_config)
-    end
   end # module DB
 end # module Mimi
 
 require_relative 'db/version'
 require_relative 'db/extensions'
+require_relative 'db/helpers'
 require_relative 'db/foreign_key'
