@@ -1,5 +1,3 @@
-require 'filelock'
-
 module Mimi
   module DB
     module Lock
@@ -45,8 +43,6 @@ module Mimi
 
         #
         def acquire_lock_with_timeout!
-          Mimi::DB.logger.info "! Locking file: #{lock_filename}"
-
           @file = File.open(lock_filename, File::RDWR | File::CREAT, 0644)
           if timeout
             Timeout.timeout(timeout, Mimi::DB::Lock::NotAvailable) { @file.flock(File::LOCK_EX) }
@@ -59,7 +55,6 @@ module Mimi
 
         #
         def release_lock!
-          Mimi::DB.logger.info "! Unlocking file: #{lock_filename}"
           @file.flock(File::LOCK_UN) if @lock_acquired
           @file.close
           # NOTE: do not unlink file here, it leads to a potential race condition:
