@@ -64,7 +64,7 @@ module Mimi
       super
       ActiveRecord::Base.logger = logger
       ActiveRecord::Base.configurations = { 'default' => active_record_config }
-      ActiveRecord::Base.raise_in_transactional_callbacks = true
+      # ActiveRecord::Base.raise_in_transactional_callbacks = true
     end
 
     def self.logger
