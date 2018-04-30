@@ -18,7 +18,7 @@ module Mimi
           ca::PostgreSQLAdapter::NATIVE_DATABASE_TYPES[:primary_key] = opts[:db_primary_key_postgresql]
         end
 
-        if ca.const_defined? :AbstractMysqlAdapter && opts[:db_primary_key_mysql]
+        if ca.const_defined?(:AbstractMysqlAdapter) && opts[:db_primary_key_mysql]
           ca::AbstractMysqlAdapter::NATIVE_DATABASE_TYPES[:primary_key] = opts[:db_primary_key_mysql]
         end
       end
