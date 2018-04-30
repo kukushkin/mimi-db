@@ -3,7 +3,7 @@ module Mimi
     module Extensions
       def self.start
         install_primary_keys!
-        install_foreign_keys!
+        install_bigint_foreign_keys!
       end
 
       def self.install_primary_keys!
