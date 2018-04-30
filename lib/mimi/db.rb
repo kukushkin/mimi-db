@@ -15,7 +15,11 @@ module Mimi
       db_username: nil,
       db_password: nil,
       db_log_level: :info,
-      db_pool: 15
+      db_pool: 15,
+      db_primary_key_cockroachdb: nil,
+      db_primary_key_postgresql: nil,
+      db_primary_key_mysql: nil,
+      db_primary_key_sqlite3: nil
       # db_encoding:
     )
 
