@@ -1,6 +1,5 @@
 require 'mimi/core'
 require 'active_record'
-require 'mini_record'
 
 module Mimi
   module DB
@@ -66,8 +65,11 @@ module Mimi
 
     def self.configure(*)
       super
+      ActiveSupport::LogSubscriber.colorize_logging = false
       ActiveRecord::Base.logger = logger
       ActiveRecord::Base.configurations = { 'default' => active_record_config }
+
+      # TODO: test and remove deprectated ...
       # ActiveRecord::Base.raise_in_transactional_callbacks = true
     end
 
@@ -78,6 +80,7 @@ module Mimi
     def self.start
       ActiveRecord::Base.establish_connection(:default)
       Mimi::DB::Extensions.start
+      Mimi::DB::Dictate.start
       Mimi.require_files(module_options[:require_files]) if module_options[:require_files]
       super
     end
@@ -102,3 +105,4 @@ require_relative 'db/version'
 require_relative 'db/extensions'
 require_relative 'db/helpers'
 require_relative 'db/foreign_key'
+require_relative 'db/dictate'
