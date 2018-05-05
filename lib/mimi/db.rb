@@ -1,6 +1,5 @@
 require 'mimi/core'
 require 'active_record'
-require 'mini_record'
 
 module Mimi
   module DB
@@ -15,7 +14,11 @@ module Mimi
       db_username: nil,
       db_password: nil,
       db_log_level: :info,
-      db_pool: 15
+      db_pool: 15,
+      db_primary_key_cockroachdb: nil,
+      db_primary_key_postgresql: nil,
+      db_primary_key_mysql: nil,
+      db_primary_key_sqlite3: nil
       # db_encoding:
     )
 
@@ -62,9 +65,12 @@ module Mimi
 
     def self.configure(*)
       super
+      ActiveSupport::LogSubscriber.colorize_logging = false
       ActiveRecord::Base.logger = logger
       ActiveRecord::Base.configurations = { 'default' => active_record_config }
-      ActiveRecord::Base.raise_in_transactional_callbacks = true
+
+      # TODO: test and remove deprectated ...
+      # ActiveRecord::Base.raise_in_transactional_callbacks = true
     end
 
     def self.logger
@@ -74,6 +80,7 @@ module Mimi
     def self.start
       ActiveRecord::Base.establish_connection(:default)
       Mimi::DB::Extensions.start
+      Mimi::DB::Dictate.start
       Mimi.require_files(module_options[:require_files]) if module_options[:require_files]
       super
     end
@@ -98,3 +105,4 @@ require_relative 'db/version'
 require_relative 'db/extensions'
 require_relative 'db/helpers'
 require_relative 'db/foreign_key'
+require_relative 'db/dictate'
