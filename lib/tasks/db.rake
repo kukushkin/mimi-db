@@ -53,10 +53,12 @@ namespace :db do
       Mimi::DB.update_schema!(destructive: true)
     end
 
-    desc 'Migrate database (schema only) (DRY RUN)'
-    task schema: :"db:start" do
-      logger.info "* Updating database schema (DRY RUN): #{Mimi::DB.module_options[:db_database]}"
-      Mimi::DB.update_schema!(destructive: true, dry_run: true)
+    namespace :schema do
+      desc 'Migrate database (schema only) (DRY RUN)'
+      task dry_run: :"db:start" do
+        logger.info "* Updating database schema (DRY RUN): #{Mimi::DB.module_options[:db_database]}"
+        Mimi::DB.update_schema!(destructive: true, dry_run: true)
+      end
     end
   end
 end
