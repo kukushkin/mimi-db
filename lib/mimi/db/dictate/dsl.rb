@@ -15,6 +15,13 @@ module Mimi
         #   field :ref_code, as: :string, default: -> { random_ref_code() } # application default
         #
         def field(name, opts = {})
+          opts = opts.dup
+          # alter model behaviour based on field properties
+          if opts[:default].is_a?(Proc)
+            field_setup_default(name, opts[:default])
+            opts.delete(:default)
+          end
+
           # register field in the schema
           schema_definition.field(name, opts)
         end
@@ -38,6 +45,16 @@ module Mimi
           end
           Mimi::DB::Dictate.schema_definitions[table_name] ||=
             Mimi::DB::Dictate::SchemaDefinition.new(table_name)
+        end
+
+        private
+
+        # Sets up a default as a block/Proc
+        #
+        def field_setup_default(name, block)
+          before_validation on: :create do
+            self.send :"#{name}=", block.call
+          end
         end
       end # module DSL
     end # module Dictate
