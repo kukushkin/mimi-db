@@ -59,6 +59,14 @@ namespace :db do
         logger.info "* Updating database schema (DRY RUN): #{Mimi::DB.module_options[:db_database]}"
         Mimi::DB.update_schema!(destructive: true, dry_run: true)
       end
+
+      desc 'Display differences between existing DB schema and target schema'
+      task diff: :"db:start" do
+        logger.info "* Diff database schema: #{Mimi::DB.module_options[:db_database]}"
+        diff = Mimi::DB.diff_schema(destructive: true, dry_run: true)
+        require 'pp'
+        pp diff
+      end
     end
   end
 end

@@ -60,6 +60,34 @@ module Mimi
         Mimi::DB::Dictate.update_schema!(opts)
       end
 
+      # Discovers differences between existing DB schema and target schema
+      # defined in models.
+      #
+      # @example
+      #   Mimi::DB.diff_schema
+      #
+      #   # =>
+      #   # {
+      #   #   add_tables: [<table_schema1>, <table_schema2> ...],
+      #   #   change_tables: [
+      #   #     { table_name: ...,
+      #   #       columns: {
+      #   #         "<column_name1>" => {
+      #   #           from: { <column_definition or nil> },
+      #   #           to: { <column_definition or nil> }
+      #   #         }
+      #   #       }
+      #   #     }, ...
+      #   #   ],
+      #   #   drop_tables: [<table_name1>, ...]
+      #   # }
+      # @return [Hash]
+      #
+      def diff_schema!(opts = {})
+        opts[:logger] ||= Mimi::DB.logger
+        Mimi::DB::Dictate.diff_schema(opts)
+      end
+
       # Creates the database specified in the current configuration.
       #
       def create!

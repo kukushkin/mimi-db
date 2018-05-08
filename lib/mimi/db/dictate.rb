@@ -85,6 +85,31 @@ module Mimi
         logger.error "DB::Dictate failed to update DB schema: #{e}"
         raise
       end
+
+      # Diff existing DB schema and the target schema
+      #
+      # @param opts [Hash]
+      # @return [Hash]
+      #
+      def self.diff_schema!(opts = {})
+        logger = opts[:logger] || ActiveRecord::Base.logger
+        diff = { add_tables: [], change_tables: [], drop_tables: []}
+        Mimi::DB.all_table_names.each do |t|
+          m = Mimi::DB::Dictate::Migrator.new(t, opts)
+          if m.from_schema && m.to_schema.nil?
+            diff[:drop_tables] << t
+          elsif m.from_schema && m.to_schema
+            t_diff = Mimi::DB::Dictate::SchemaDiff.diff(m.from_schema, m.to_schema)
+            diff[:change_tables] << t_diff unless t_diff[:columns].empty? && t_diff[:indexes].empty?
+          elsif m.from_schema.nil? &&  m.to_schema
+            diff[:add_tables] << m.to_schema
+          end
+        end
+        diff
+      rescue StandardError => e
+        logger.error "DB::Dictate failed to update DB schema: #{e}"
+        raise
+      end
     end # module Dictate
   end # module DB
 end # module Mimi

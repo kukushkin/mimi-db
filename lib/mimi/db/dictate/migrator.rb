@@ -83,24 +83,28 @@ module Mimi
 
         def run_change_table!
           diff = Mimi::DB::Dictate::SchemaDiff.diff(from_schema, to_schema)
-          if diff.empty?
+          if diff[:columns].empty? && diff[:indexes].empty?
             logger.info "- no changes: #{table_name}"
             return
           end
           logger.info "- ALTER TABLE: #{table_name}"
-          run_change_table_columns!(diff[:columns]) if diff[:columns]
-          run_change_table_indexes!(diff[:indexes]) if diff[:indexes]
+          run_change_table_columns!(diff[:columns]) unless diff[:columns].empty?
+          run_change_table_indexes!(diff[:indexes]) unless diff[:indexes].empty?
         end
 
         def run_change_table_columns!(diff_columns)
-          diff_columns[:remove]&.each { |c| drop_column!(table_name, c) }
-          diff_columns[:change]&.each { |c| change_column!(table_name, c) }
-          diff_columns[:add]&.each    { |c| add_column!(table_name, c) }
+          diff_columns.each do |c, diff|
+            drop_column!(table_name, c) if diff[:from] && diff[:to].nil?
+            change_column!(table_name, diff[:to]) if diff[:from] && diff[:to]
+            add_column!(table_name, diff[:to]) if diff[:from].nil? && diff[:to]
+          end
         end
 
         def run_change_table_indexes!(diff_indexes)
-          diff_indexes[:remove]&.each { |i| drop_index!(table_name, i) }
-          diff_indexes[:add]&.each    { |i| add_index!(table_name, i) }
+          diff_indexes.each do |i, diff|
+            drop_index!(table_name, diff[:from]) if diff[:from] && diff[:to].nil?
+            add_index!(table_name, diff[:to]) if diff[:from].nil? && diff[:to]
+          end
         end
 
         def run_create_table!
