@@ -63,9 +63,31 @@ namespace :db do
       desc 'Display differences between existing DB schema and target schema'
       task diff: :"db:start" do
         logger.info "* Diff database schema: #{Mimi::DB.module_options[:db_database]}"
-        diff = Mimi::DB.diff_schema(destructive: true, dry_run: true)
+        diff = Mimi::DB.diff_schema!(destructive: true, dry_run: true)
         require 'pp'
-        pp diff
+        diff[:add_tables].each do |t|
+          puts "-- ADD table: #{t.table_name}"
+          pp t.to_h
+        end
+        diff[:change_tables].each do |t|
+          puts "-- ALTER table: #{t[:table_name]}"
+          columns = t[:columns]
+          columns.each do |c, c_diff|
+            puts "  -- ALTER COLUMN #{c}"
+            puts "    -- FROM:"
+            pp c_diff[:from].to_h
+            puts "    -- TO:"
+            pp c_diff[:to].to_h
+          end
+          indexes = t[:indexes]
+          indexes.each do |cols, i_diff|
+            puts "  -- ADD  INDEX: #{cols}, #{i_diff[:to].to_h}" if i_diff[:from].nil? && i_diff[:to]
+            puts "  -- DROP INDEX: #{cols}" if i_diff[:from] && i_diff[:to].nil?
+          end
+        end
+        diff[:drop_tables].each do |t|
+          puts "-- DROP table: #{t}"
+        end
       end
     end
   end
