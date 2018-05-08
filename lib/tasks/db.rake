@@ -63,7 +63,7 @@ namespace :db do
       desc 'Display differences between existing DB schema and target schema'
       task diff: :"db:start" do
         logger.info "* Diff database schema: #{Mimi::DB.module_options[:db_database]}"
-        diff = Mimi::DB.diff_schema!(destructive: true, dry_run: true)
+        diff = Mimi::DB.diff_schema
         require 'pp'
         diff[:add_tables].each do |t|
           puts "-- ADD table: #{t.table_name}"
