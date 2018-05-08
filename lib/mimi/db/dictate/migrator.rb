@@ -118,7 +118,7 @@ module Mimi
           logger.info "-- add column: #{table_name}.#{column_pk.name} (#{params})"
           unless dry_run?
             db_connection.create_table(table_name, id: false) do |t|
-              t.column column_pk.name, column_pk.type, column_pk.params
+              t.column column_pk.name, column_pk.type, column_pk.to_ar_params
             end
           end
 
@@ -137,14 +137,14 @@ module Mimi
           params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
           logger.info "-- change column: #{table_name}.#{column.name} (#{params})"
           return if dry_run?
-          db_connection.change_column(table_name, column.name, column.type, column.params)
+          db_connection.change_column(table_name, column.name, column.type, column.to_ar_params)
         end
 
         def add_column!(table_name, column)
           params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
           logger.info "-- add column: #{table_name}.#{column.name} (#{params})"
           return if dry_run?
-          db_connection.add_column(table_name, column.name, column.type, column.params)
+          db_connection.add_column(table_name, column.name, column.type, column.to_ar_params)
         end
 
         def drop_index!(table_name, idx)

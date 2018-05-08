@@ -84,6 +84,12 @@ module Mimi
             }
           end
 
+          def to_ar_params
+            p = params.dup
+            p[:null] = !p[:not_null]
+            p
+          end
+
           def ==(other)
             unless other.name == name
               raise ArgumentError, 'Cannot compare columns with different names'
