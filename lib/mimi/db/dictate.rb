@@ -91,7 +91,7 @@ module Mimi
       # @param opts [Hash]
       # @return [Hash]
       #
-      def self.diff_schema!(opts = {})
+      def self.diff_schema(opts = {})
         logger = opts[:logger] || ActiveRecord::Base.logger
         diff = { add_tables: [], change_tables: [], drop_tables: []}
         Mimi::DB.all_table_names.each do |t|
