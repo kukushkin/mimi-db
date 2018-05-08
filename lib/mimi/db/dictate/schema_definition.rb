@@ -94,7 +94,7 @@ module Mimi
             equal &&= params[:primary_key] == other.params[:primary_key]
             # FIXME: auto_increment ignored
             equal &&= params[:not_null] == other.params[:not_null]
-            equal &&= params[:default] == other.params[:default]
+            equal &&= params[:default].to_s == other.params[:default].to_s
             # FIXME: sql_type ignored
             equal
           end
