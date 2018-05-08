@@ -83,7 +83,7 @@ module Mimi
       #   # }
       # @return [Hash]
       #
-      def diff_schema!(opts = {})
+      def diff_schema(opts = {})
         opts[:logger] ||= Mimi::DB.logger
         Mimi::DB::Dictate.diff_schema(opts)
       end
