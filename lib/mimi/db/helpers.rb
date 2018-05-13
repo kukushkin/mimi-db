@@ -7,7 +7,7 @@ module Mimi
       # @return [Array<ActiveRecord::Base>]
       #
       def models
-        ActiveRecord::Base.descendants
+        Mimi::DB::Model.descendants
       end
 
       # Returns a list of table names defined in models
@@ -23,7 +23,7 @@ module Mimi
       # @return [Array<String>]
       #
       def db_table_names
-        ActiveRecord::Base.connection.tables
+        Mimi::DB.connection.tables
       end
 
       # Returns a list of all discovered table names,
@@ -91,6 +91,8 @@ module Mimi
       # Creates the database specified in the current configuration.
       #
       def create!
+        raise "Not implemented"
+
         db_adapter = Mimi::DB.active_record_config['adapter']
         db_database = Mimi::DB.active_record_config['database']
         slim_url = "#{db_adapter}//<host>:<port>/#{db_database}"
@@ -110,10 +112,10 @@ module Mimi
       # Tries to establish connection, returns true if the database exist
       #
       def database_exist?
-        ActiveRecord::Base.establish_connection(Mimi::DB.active_record_config)
-        ActiveRecord::Base.connection
+        Mimi::DB.connection.test_connection
         true
-      rescue ActiveRecord::NoDatabaseError
+      rescue StandardError => e
+        Mimi::DB.logger.error "DB: database_exist? failed with: #{e}"
         false
       end
 
@@ -130,31 +132,13 @@ module Mimi
       # Drops the database specified in the current configuration.
       #
       def drop!
-        original_stdout = $stdout
-        original_stderr = $stderr
-        $stdout = StringIO.new
-        $stderr = StringIO.new
-        ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-        ActiveRecord::Tasks::DatabaseTasks.drop(Mimi::DB.active_record_config)
-        Mimi::DB.logger.debug "Mimi::DB.drop! out:#{$stdout.string}, err:#{$stderr.string}"
-      ensure
-        $stdout = original_stdout
-        $stderr = original_stderr
+        raise "Not implemented"
       end
 
       # Clears (but not drops) the database specified in the current configuration.
       #
       def clear!
-        original_stdout = $stdout
-        original_stderr = $stderr
-        $stdout = StringIO.new
-        $stderr = StringIO.new
-        ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-        ActiveRecord::Tasks::DatabaseTasks.purge(Mimi::DB.active_record_config)
-        Mimi::DB.logger.debug "Mimi::DB.clear! out:#{$stdout.string}, err:#{$stderr.string}"
-      ensure
-        $stdout = original_stdout
-        $stderr = original_stderr
+        raise "Not implemented"
       end
 
       # Executes raw SQL, with variables interpolation.
@@ -163,8 +147,8 @@ module Mimi
       #   Mimi::DB.execute('insert into table1 values(?, ?, ?)', 'foo', :bar, 123)
       #
       def execute(statement, *args)
-        sql = ActiveRecord::Base.send(:replace_bind_variables, statement, args)
-        ActiveRecord::Base.connection.execute(sql)
+        sql = Sequel.fetch(statement, *args).sql
+        Mimi::DB.connection.run(sql)
       end
     end # module Helpers
 

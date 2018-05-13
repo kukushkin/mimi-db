@@ -3,7 +3,7 @@ module Mimi
     module Extensions
       def self.start
         # install DB::Dictate
-        ActiveRecord::Base.send(:include, Mimi::DB::Dictate)
+        Mimi::DB::Model.send(:include, Mimi::DB::Dictate)
 
         # FIXME: refactor DSL for primary/foreign keys
         # install_primary_keys!

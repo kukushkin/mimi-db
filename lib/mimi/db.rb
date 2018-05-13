@@ -1,5 +1,5 @@
 require 'mimi/core'
-require 'active_record'
+require 'sequel'
 
 module Mimi
   module DB
@@ -14,11 +14,7 @@ module Mimi
       db_username: nil,
       db_password: nil,
       db_log_level: :info,
-      db_pool: 15,
-      db_primary_key_cockroachdb: nil,
-      db_primary_key_postgresql: nil,
-      db_primary_key_mysql: nil,
-      db_primary_key_sqlite3: nil
+      db_pool: 15
       # db_encoding:
     )
 
@@ -65,9 +61,9 @@ module Mimi
 
     def self.configure(*)
       super
-      ActiveSupport::LogSubscriber.colorize_logging = false
-      ActiveRecord::Base.logger = logger
-      ActiveRecord::Base.configurations = { 'default' => active_record_config }
+      # ActiveSupport::LogSubscriber.colorize_logging = false
+      # ActiveRecord::Base.logger = logger
+      # ActiveRecord::Base.configurations = { 'default' => active_record_config }
 
       # TODO: test and remove deprectated ...
       # ActiveRecord::Base.raise_in_transactional_callbacks = true
@@ -77,26 +73,59 @@ module Mimi
       @logger ||= Mimi::Logger.new(level: module_options[:db_log_level])
     end
 
+    # Returns active DB connection
+    #
+    # @return [Sequel::<...>::Database]
+    #
+    def self.connection
+      @connection
+    end
+
     def self.start
-      ActiveRecord::Base.establish_connection(:default)
+      @connection = Sequel.connect(sequel_config)
       Mimi::DB::Extensions.start
       Mimi::DB::Dictate.start
       Mimi.require_files(module_options[:require_files]) if module_options[:require_files]
       super
     end
 
-    def self.active_record_config
+    # Returns a standard Sequel adapter name converted from any variation of adapter names.
+    #
+    # @example
+    #   sequel_config_canonical_adapter_name(:sqlite3) # => 'sqlite'
+    #
+    # @param adapter_name [String,Symbol]
+    # @return [String]
+    #
+    def self.sequel_config_canonical_adapter_name(adapter_name)
+      case adapter_name.to_s.downcase
+      when 'sqlite', 'sqlite3'
+        'sqlite'
+      when 'postgres', 'postgresql'
+        'postgres'
+      when 'cockroach', 'cockroachdb'
+        'cockroachdb'
+      else
+        adapter_name.to_s.downcase
+      end
+    end
+
+    # Returns Sequel connection parameters
+    #
+    # @return [Hash]
+    #
+    def self.sequel_config
       {
-        adapter: module_options[:db_adapter],
+        adapter: sequel_config_canonical_adapter_name(module_options[:db_adapter]),
         database: module_options[:db_database],
         host: module_options[:db_host],
         port: module_options[:db_port],
-        username: module_options[:db_username],
+        user: module_options[:db_username],
         password: module_options[:db_password],
         encoding: module_options[:db_encoding],
-        pool: module_options[:db_pool],
-        reaping_frequency: 15
-      }.stringify_keys
+        max_connections: module_options[:db_pool],
+        logger: logger
+      }
     end
   end # module DB
 end # module Mimi
@@ -106,3 +135,5 @@ require_relative 'db/extensions'
 require_relative 'db/helpers'
 require_relative 'db/foreign_key'
 require_relative 'db/dictate'
+require_relative 'db/model'
+

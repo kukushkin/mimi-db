@@ -52,8 +52,8 @@ module Mimi
         # Sets up a default as a block/Proc
         #
         def field_setup_default(name, block)
-          before_validation on: :create do
-            self.send :"#{name}=", block.call
+          define_method(:before_validation) do
+            self.send :"#{name}=", block.call unless self.send(name.to_sym)
           end
         end
       end # module DSL

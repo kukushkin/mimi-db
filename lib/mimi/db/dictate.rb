@@ -18,7 +18,7 @@ module Mimi
       end
 
       def self.start
-        ActiveRecord::Base.extend Mimi::DB::Dictate::DSL
+        # ActiveRecord::Base.extend Mimi::DB::Dictate::DSL
       end
 
       def self.schema_definitions
@@ -26,19 +26,20 @@ module Mimi
       end
 
       def self.adapter_type
-        ca = ActiveRecord::ConnectionAdapters
-        c  = ActiveRecord::Base.connection
+        Mimi::DB.connection.adapter_scheme
+        # ca = ActiveRecord::ConnectionAdapters
+        # c  = ActiveRecord::Base.connection
 
-        # TODO: postgres???
-        return :cockroachdb if ca.const_defined?(:CockroachDBAdapter) && c.is_a?(ca::PostgreSQLAdapter)
+        # # TODO: postgres???
+        # return :cockroachdb if ca.const_defined?(:CockroachDBAdapter) && c.is_a?(ca::PostgreSQLAdapter)
 
-        return :postgresql if ca.const_defined?(:PostgreSQLAdapter) && c.is_a?(ca::PostgreSQLAdapter)
+        # return :postgresql if ca.const_defined?(:PostgreSQLAdapter) && c.is_a?(ca::PostgreSQLAdapter)
 
-        return :mysql if ca.const_defined?(:AbstractMysqlAdapter) && c.is_a?(ca::AbstractMysqlAdapter)
+        # return :mysql if ca.const_defined?(:AbstractMysqlAdapter) && c.is_a?(ca::AbstractMysqlAdapter)
 
-        return :sqlite3 if ca.const_defined?(:SQLite3Adapter) && c.is_a?(ca::SQLite3Adapter)
+        # return :sqlite3 if ca.const_defined?(:SQLite3Adapter) && c.is_a?(ca::SQLite3Adapter)
 
-        raise 'Unrecognized database adapter type'
+        # raise 'Unrecognized database adapter type'
       end
 
       # Returns type defaults based on given type:
@@ -48,7 +49,7 @@ module Mimi
       #
       def self.type_defaults(type)
         type = type.to_sym
-        connection_defaults = ActiveRecord::Base.connection.native_database_types
+        connection_defaults = {} # ActiveRecord::Base.connection.native_database_types
         adapter_defaults = TYPE_DEFAULTS[DB::Dictate.adapter_type]
         d = (adapter_defaults && adapter_defaults[type]) || connection_defaults[type] || {}
         d = {

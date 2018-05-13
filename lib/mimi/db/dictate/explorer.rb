@@ -26,19 +26,18 @@ module Mimi
         # @param schema_definition [Mimi::DB::Dictate::SchemaDefinition]
         #
         def self.discover_schema_columns(schema_definition)
-          columns = connection.columns(schema_definition.table_name)
-          pk = connection.primary_key(schema_definition.table_name)
-          columns.each do |c|
+          columns = connection.schema(schema_definition.table_name).to_h
+          columns.each do |name, c|
             params = {
-              as: c.type,
-              limit: c.limit,
-              primary_key: (pk == c.name),
-              auto_increment: false, # FIXME: SQLite does not report autoincremented fields
-              not_null: !c.null,
-              default: c.default,
-              sql_type: c.sql_type
+              as: c[:type],
+              limit: c[:max_length],
+              primary_key: c[:primary_key],
+              auto_increment: c[:auto_increment], # FIXME: SQLite does not report autoincremented fields
+              not_null: !c[:allow_null],
+              default: c[:default],
+              sql_type: c[:db_type]
             }
-            schema_definition.field(c.name, params)
+            schema_definition.field(name, params)
           end
         end
         private_class_method :discover_schema_columns
@@ -49,23 +48,35 @@ module Mimi
         # @param schema_definition [Mimi::DB::Dictate::SchemaDefinition]
         #
         def self.discover_schema_indexes(schema_definition)
-          indexes = connection.indexes(schema_definition.table_name)
-          pk = connection.primary_key(schema_definition.table_name)
-          indexes.each do |idx|
+          indexes = connection.indexes(schema_definition.table_name).to_h
+          pk = discover_primary_key(schema_definition.table_name)
+          indexes.each do |idx_name, idx_data|
             params = {
-              name: idx.name,
-              primary_key:  idx.columns == [pk],
-              unique: idx.unique
+              name: idx_name,
+              primary_key:  idx_data[:columns] == pk,
+              unique: idx_data[:unique]
             }
-            schema_definition.index(idx.columns, params)
+            schema_definition.index(idx_data[:columns], params)
           end
         end
         private_class_method :discover_schema_indexes
 
+        # Discovers primary key of an existing DB table
+        #
+        # @private
+        # @param table_name [String,Symbol]
+        #
+        # @return [Array<Symbol>]
+        #
+        def self.discover_primary_key(table_name)
+          s = connection.schema(table_name).to_h
+          s.keys.select { |name| s[name][:primary_key] }
+        end
+
         # Returns ActiveRecord DB connection
         #
         def self.connection
-          ActiveRecord::Base.connection
+          Mimi::DB.connection
         end
       end # module Explorer
     end # module Dictate
