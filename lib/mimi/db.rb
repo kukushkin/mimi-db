@@ -61,16 +61,13 @@ module Mimi
 
     def self.configure(*)
       super
-      # ActiveSupport::LogSubscriber.colorize_logging = false
-      # ActiveRecord::Base.logger = logger
-      # ActiveRecord::Base.configurations = { 'default' => active_record_config }
-
-      # TODO: test and remove deprectated ...
-      # ActiveRecord::Base.raise_in_transactional_callbacks = true
+      if Mimi.const_defined?(:Application)
+        @logger = Mimi::Application.logger
+      end
     end
 
     def self.logger
-      @logger ||= Mimi::Logger.new(level: module_options[:db_log_level])
+      @logger ||= Mimi::Logger.new
     end
 
     # Returns active DB connection
@@ -82,9 +79,8 @@ module Mimi
     end
 
     def self.start
-      @connection = Sequel.connect(sequel_config)
       Mimi::DB::Extensions.start
-      Mimi::DB::Dictate.start
+      @connection = Sequel.connect(sequel_config)
       Mimi.require_files(module_options[:require_files]) if module_options[:require_files]
       super
     end
@@ -124,6 +120,7 @@ module Mimi
         password: module_options[:db_password],
         encoding: module_options[:db_encoding],
         max_connections: module_options[:db_pool],
+        sql_log_level: module_options[:db_log_level],
         logger: logger
       }
     end
@@ -136,4 +133,3 @@ require_relative 'db/helpers'
 require_relative 'db/foreign_key'
 require_relative 'db/dictate'
 require_relative 'db/model'
-

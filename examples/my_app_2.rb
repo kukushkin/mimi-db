@@ -14,21 +14,7 @@ CONFIG = {
 Mimi::DB.configure(CONFIG)
 Mimi::DB.start
 
-class MyModel < Mimi::DB::Model
-  field :id, as: :integer, primary_key: true, not_null: true, autoincrement: true
-  field :name, as: :string, limit: 64
-  field :code, as: :string, default: -> { random_code }
-  field :value, as: :decimal, precision: 10, scale: 3
+require_relative 'my_model'
 
-  index :name
-
-  def self.random_code
-    SecureRandom.hex(16)
-  end
-end # class MyModel
-
-
-Mimi::DB.create_if_not_exist! # creates configured database
 require 'pp'
-
 pp Mimi::DB.diff_schema

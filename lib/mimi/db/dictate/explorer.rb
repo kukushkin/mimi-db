@@ -9,10 +9,11 @@ module Mimi
         #
         # Returns nil if the DB table does not exist.
         #
-        # @param table_name [String]
+        # @param table_name [String,Symbol]
         # @return [Mimi::DB::Dictate::SchemaDefinition,nil]
         #
         def self.discover_schema(table_name)
+          table_name = table_name.to_sym
           return nil unless connection.tables.include?(table_name)
           sd = Mimi::DB::Dictate::SchemaDefinition.new(table_name)
           discover_schema_columns(sd)
@@ -30,12 +31,14 @@ module Mimi
           columns.each do |name, c|
             params = {
               as: c[:type],
-              limit: c[:max_length],
+              type: c[:type],
+              size: c[:max_length],
               primary_key: c[:primary_key],
               auto_increment: c[:auto_increment], # FIXME: SQLite does not report autoincremented fields
-              not_null: !c[:allow_null],
+              null: c[:allow_null],
+              db_default: c[:default],
               default: c[:default],
-              sql_type: c[:db_type]
+              db_type: c[:db_type]
             }
             schema_definition.field(name, params)
           end

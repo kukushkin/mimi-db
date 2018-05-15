@@ -2,6 +2,7 @@ module Mimi
   module DB
     class Model
       extend Sequel::Inflections
+      include Mimi::DB::Dictate
 
       # Returns the corresponding table name
       #

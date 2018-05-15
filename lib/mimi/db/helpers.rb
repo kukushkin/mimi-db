@@ -138,7 +138,11 @@ module Mimi
       # Clears (but not drops) the database specified in the current configuration.
       #
       def clear!
-        raise "Not implemented"
+        Mimi::DB.start
+        db_table_names.each do |table_name|
+          Mimi::DB.logger.info "Mimi::DB dropping table: #{table_name}"
+          Mimi::DB.connection.drop_table(table_name)
+        end
       end
 
       # Executes raw SQL, with variables interpolation.
@@ -149,6 +153,18 @@ module Mimi
       def execute(statement, *args)
         sql = Sequel.fetch(statement, *args).sql
         Mimi::DB.connection.run(sql)
+      end
+
+      # Executes a block with a given DB log level
+      #
+      # @param log_level [Symbol,nil] :debug, :info etc
+      #
+      def with_log_level(log_level, &_block)
+        current_log_level = Mimi::DB.connection.sql_log_level
+        Mimi::DB.connection.sql_log_level = log_level
+        yield
+      ensure
+        Mimi::DB.connection.sql_log_level = current_log_level
       end
     end # module Helpers
 

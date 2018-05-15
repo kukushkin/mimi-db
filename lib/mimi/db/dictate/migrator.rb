@@ -22,12 +22,12 @@ module Mimi
         # @param options [Hash]
         #
         def initialize(table_name, options)
-          @table_name = table_name
+          @table_name = table_name.to_sym
           @options = DEFAULTS.merge(options.dup)
-          @from_schema = self.class.db_schema_definition(table_name.to_s)
-          @to_schema   = Mimi::DB::Dictate.schema_definitions[table_name.to_s]
+          @from_schema = self.class.db_schema_definition(@table_name)
+          @to_schema   = Mimi::DB::Dictate.schema_definitions[@table_name]
           if from_schema.nil? && to_schema.nil?
-            raise "Failed to migrate '#{table_name}', no DB or target schema found"
+            raise "Failed to migrate '#{@table_name}', no DB or target schema found"
           end
         end
 
@@ -36,7 +36,7 @@ module Mimi
         end
 
         def db_connection
-          ActiveRecord::Base.connection
+          Mimi::DB.connection
         end
 
         # Returns true if the Migrator is configured to do a dry run (no actual changes to DB)
@@ -115,10 +115,10 @@ module Mimi
 
           # issue CREATE TABLE with primary key field
           logger.info "- CREATE TABLE: #{table_name}"
-          logger.info "-- add column: #{table_name}.#{column_pk.name} (#{params})"
+          logger.info "-- add column: #{table_name}.#{column_pk}"
           unless dry_run?
-            db_connection.create_table(table_name, id: false) do |t|
-              t.column column_pk.name, column_pk.type, column_pk.to_ar_params
+            db_connection.create_table(table_name) do |_|
+              column column_pk.name, column_pk.sequel_type, column_pk.to_sequel_params
             end
           end
 
@@ -130,28 +130,36 @@ module Mimi
         def drop_column!(table_name, column_name)
           logger.info "-- drop column: #{table_name}.#{column_name}"
           return if dry_run? || !destructive?(:columns)
-          db_connection.remove_column(table_name, column_name)
+          db_connection.drop_column(table_name, column_name)
         end
 
         def change_column!(table_name, column)
           params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
-          logger.info "-- change column: #{table_name}.#{column.name} (#{params})"
+          logger.info "-- change column: #{table_name}.#{column}"
           return if dry_run?
-          db_connection.change_column(table_name, column.name, column.type, column.to_ar_params)
+          db_connection.alter_table(table_name) do
+            set_column_type column.name, column.sequel_type, column.to_sequel_params.except(:default, :null)
+            set_column_default column.name, column.params[:default]
+            if column.to_sequel_params[:null]
+              set_column_allow_null column.name
+            else
+              set_column_not_null column.name
+            end
+          end
         end
 
         def add_column!(table_name, column)
           params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
-          logger.info "-- add column: #{table_name}.#{column.name} (#{params})"
+          logger.info "-- add column: #{table_name}.#{column}"
           return if dry_run?
-          db_connection.add_column(table_name, column.name, column.type, column.to_ar_params)
+          db_connection.add_column(table_name, column.name, column.sequel_type, column.to_sequel_params)
         end
 
         def drop_index!(table_name, idx)
           idx_column_names = idx.columns.join(', ')
           logger.info "-- drop index: #{idx.name} on #{table_name}(#{idx_column_names})"
           return if dry_run?
-          db_connection.remove_index(table_name, column: idx.columns)
+          db_connection.drop_index(table_name, idx.columns)
         end
 
         def add_index!(table_name, idx)

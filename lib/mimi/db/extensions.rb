@@ -2,8 +2,7 @@ module Mimi
   module DB
     module Extensions
       def self.start
-        # install DB::Dictate
-        Mimi::DB::Model.send(:include, Mimi::DB::Dictate)
+        require_relative 'extensions/sequel-cockroachdb'
 
         # FIXME: refactor DSL for primary/foreign keys
         # install_primary_keys!

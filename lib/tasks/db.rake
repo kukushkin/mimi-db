@@ -40,17 +40,22 @@ namespace :db do
   namespace :migrate do
     desc 'Migrate database (seeds only)'
     task seeds: :"db:start" do
+      logger.info "* Processing database seeds: #{Mimi::DB.module_options[:db_database]}"
+      t_start = Time.now
       seeds = Pathname.glob(Mimi.app_path_to('db', 'seeds', '**', '*.rb')).sort
       seeds.each do |seed_filename|
-        logger.info "* Processing seed: #{seed_filename}"
+        logger.info "-- Processing seed: #{seed_filename}"
         load seed_filename
       end
+      logger.info '* Finished processing database seeds (%.3fs)' % (Time.now - t_start)
     end
 
     desc 'Migrate database (schema only)'
     task schema: :"db:start" do
       logger.info "* Updating database schema: #{Mimi::DB.module_options[:db_database]}"
+      t_start = Time.now
       Mimi::DB.update_schema!(destructive: true)
+      logger.info '* Finished updating database schema (%.3fs)' % (Time.now - t_start)
     end
 
     namespace :schema do

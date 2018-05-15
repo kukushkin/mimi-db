@@ -3,11 +3,15 @@ require_relative 'dictate/schema_definition'
 require_relative 'dictate/schema_diff'
 require_relative 'dictate/explorer'
 require_relative 'dictate/migrator'
+require_relative 'dictate/type_defaults'
 
 module Mimi
   module DB
     module Dictate
       TYPE_DEFAULTS = {
+        default: {
+          string: { name: 'varchar', limit: nil }
+        },
         # sqlite3: {
         #   string: { name: 'varchar', limit: 32 }
         # }
@@ -18,7 +22,7 @@ module Mimi
       end
 
       def self.start
-        # ActiveRecord::Base.extend Mimi::DB::Dictate::DSL
+        #
       end
 
       def self.schema_definitions
@@ -49,9 +53,9 @@ module Mimi
       #
       def self.type_defaults(type)
         type = type.to_sym
-        connection_defaults = {} # ActiveRecord::Base.connection.native_database_types
+        common_defaults = TYPE_DEFAULTS[:default]
         adapter_defaults = TYPE_DEFAULTS[DB::Dictate.adapter_type]
-        d = (adapter_defaults && adapter_defaults[type]) || connection_defaults[type] || {}
+        d = (adapter_defaults && adapter_defaults[type]) || common_defaults[type] || {}
         d = {
           sql_type: d.is_a?(String) ? d : d[:name],
           limit: d.is_a?(String) ? nil : d[:limit]
@@ -78,12 +82,12 @@ module Mimi
       #
       def self.update_schema!(opts = {})
         logger = opts[:logger] || ActiveRecord::Base.logger
-        logger.info "Mimi::DB::Dictate started updating DB schema"
+        logger.debug "Mimi::DB::Dictate started updating DB schema"
         t_start = Time.now
         Mimi::DB.all_table_names.each { |t| Mimi::DB::Dictate::Migrator.new(t, opts).run! }
-        logger.info 'Mimi::DB::Dictate finished updating DB schema (%.3fs)' % [Time.now - t_start]
+        logger.debug 'Mimi::DB::Dictate finished updating DB schema (%.3fs)' % [Time.now - t_start]
       rescue StandardError => e
-        logger.error "DB::Dictate failed to update DB schema: #{e}"
+        logger.error "Mimi::DB::Dictate failed to update DB schema: #{e}"
         raise
       end
 
@@ -100,6 +104,7 @@ module Mimi
           if m.from_schema && m.to_schema.nil?
             diff[:drop_tables] << t
           elsif m.from_schema && m.to_schema
+            logger.info "DB::Dictate comparing #{t}"
             t_diff = Mimi::DB::Dictate::SchemaDiff.diff(m.from_schema, m.to_schema)
             diff[:change_tables] << t_diff unless t_diff[:columns].empty? && t_diff[:indexes].empty?
           elsif m.from_schema.nil? &&  m.to_schema
@@ -108,7 +113,7 @@ module Mimi
         end
         diff
       rescue StandardError => e
-        logger.error "DB::Dictate failed to update DB schema: #{e}"
+        logger.error "DB::Dictate failed to compare schema: #{e}"
         raise
       end
     end # module Dictate
