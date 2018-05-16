@@ -54,9 +54,11 @@ module Mimi
         end
 
         def run!
-          run_drop_table! if from_schema && to_schema.nil?
-          run_change_table! if from_schema && to_schema
-          run_create_table! if from_schema.nil? && to_schema
+          db_ddl_transaction do
+            run_drop_table! if from_schema && to_schema.nil?
+            run_change_table! if from_schema && to_schema
+            run_create_table! if from_schema.nil? && to_schema
+          end
           self.class.reset_db_schema_definition!(table_name)
         end
 
@@ -168,6 +170,15 @@ module Mimi
           logger.info "-- add index: #{idx.name} on #{table_name}(#{idx_column_names}), #{params}"
           return if dry_run?
           db_connection.add_index(table_name, idx.columns, idx.params)
+        end
+
+        def db_ddl_transaction(&_block)
+          supports_transactional_ddl = db_connection.respond_to?(:supports_transactional_ddl?) &&
+            db_connection.supports_transactional_ddl?
+          return yield unless supports_transactional_ddl
+          db_connection.transaction do
+            yield
+          end
         end
       end # class Migrator
     end # module Dictate

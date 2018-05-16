@@ -13,7 +13,7 @@ module Mimi
       db_port: nil,
       db_username: nil,
       db_password: nil,
-      db_log_level: :info,
+      db_log_level: :debug,
       db_pool: 15
       # db_encoding:
     )
@@ -54,7 +54,7 @@ module Mimi
         },
         db_log_level: {
           desc: 'Logging level for database layer ("debug", "info" etc)',
-          default: 'info'
+          default: 'debug'
         }
       }
     end

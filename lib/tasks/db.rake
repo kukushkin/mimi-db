@@ -93,6 +93,9 @@ namespace :db do
         diff[:drop_tables].each do |t|
           puts "-- DROP table: #{t}"
         end
+        if diff[:add_tables].empty? && diff[:change_tables].empty? && diff[:drop_tables].empty?
+          logger.info '* Diff database schema: no changes detected'
+        end
       end
     end
   end

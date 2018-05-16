@@ -56,6 +56,7 @@ module Mimi
       #   Mimi::DB.update_schema!(destructive: true)
       #
       def update_schema!(opts = {})
+        Mimi::DB.start
         opts[:logger] ||= Mimi::DB.logger
         Mimi::DB::Dictate.update_schema!(opts)
       end
@@ -84,6 +85,7 @@ module Mimi
       # @return [Hash]
       #
       def diff_schema(opts = {})
+        Mimi::DB.start
         opts[:logger] ||= Mimi::DB.logger
         Mimi::DB::Dictate.diff_schema(opts)
       end
@@ -140,7 +142,7 @@ module Mimi
       def clear!
         Mimi::DB.start
         db_table_names.each do |table_name|
-          Mimi::DB.logger.info "Mimi::DB dropping table: #{table_name}"
+          Mimi::DB.logger.debug "Mimi::DB dropping table: #{table_name}"
           Mimi::DB.connection.drop_table(table_name)
         end
       end

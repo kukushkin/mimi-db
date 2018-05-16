@@ -1,16 +1,14 @@
+# frozen_string_literal: true
+
+# NOTE: this is the way to create an abstract class that inherits from Sequel::Model
+Mimi::DB::Model = Class.new(Sequel::Model)
+
 module Mimi
   module DB
     class Model
-      extend Sequel::Inflections
       include Mimi::DB::Dictate
 
-      # Returns the corresponding table name
-      #
-      # @return [String]
-      #
-      def self.table_name
-        pluralize(underscore(demodulize(name))).to_sym
-      end
+      self.require_valid_table = false
     end # class Model
   end # module DB
 end # module Mimi
