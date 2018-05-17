@@ -73,12 +73,12 @@ module Mimi
             varchar:   DEF_OPT_SIZE_PROC.call('varchar', '(255)'),
             text:      { db_type: 'text' },
 
-            bytes:     { db_type: 'bytes' },
-            bytea:     { db_type: 'bytes' },
-            blob:      { db_type: 'bytes' },
+            bytes:     { db_type: 'bytea', sequel_type: :bytea },
+            bytea:     { db_type: 'bytea' },
+            blob:      { db_type: 'blob' },
 
-            bool:      { db_type: 'bool' },
-            boolean:   { db_type: 'bool' },
+            bool:      { db_type: 'bool', sequel_type: :bool },
+            boolean:   { db_type: 'bool', sequel_type: :bool },
 
             date:      { db_type: 'date' },
             timestamp: { db_type: 'timestamp' },
