@@ -112,8 +112,6 @@ module Mimi
         def run_create_table!
           columns    = to_schema.columns.values
           column_pk  = to_schema.primary_key
-          params =
-            column_pk.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
 
           # issue CREATE TABLE with primary key field
           logger.info "- CREATE TABLE: #{table_name}"
@@ -136,7 +134,6 @@ module Mimi
         end
 
         def change_column!(table_name, column)
-          params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
           logger.info "-- change column: #{table_name}.#{column}"
           return if dry_run?
           db_connection.alter_table(table_name) do
@@ -151,7 +148,6 @@ module Mimi
         end
 
         def add_column!(table_name, column)
-          params = column.params.select { |_, v| v }.map { |k, v| "#{k}: #{v.inspect}" }.join(', ')
           logger.info "-- add column: #{table_name}.#{column}"
           return if dry_run?
           db_connection.add_column(table_name, column.name, column.sequel_type, column.to_sequel_params)
@@ -173,12 +169,11 @@ module Mimi
         end
 
         def db_ddl_transaction(&_block)
-          supports_transactional_ddl = db_connection.respond_to?(:supports_transactional_ddl?) &&
+          supports_transactional_ddl =
+            db_connection.respond_to?(:supports_transactional_ddl?) &&
             db_connection.supports_transactional_ddl?
           return yield unless supports_transactional_ddl
-          db_connection.transaction do
-            yield
-          end
+          db_connection.transaction { yield }
         end
       end # class Migrator
     end # module Dictate

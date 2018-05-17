@@ -3,6 +3,11 @@
 require 'sequel/adapters/postgres'
 
 module Sequel
+  #
+  # A simplistic and not fully functional CockroachDB adapter
+  #
+  # TODO: to replace with a better alternative once available
+  #
   module Cockroach
     class Database < Sequel::Postgres::Database
       set_adapter_scheme :cockroach

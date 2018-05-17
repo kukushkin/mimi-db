@@ -1,20 +1,22 @@
 module Mimi
   module DB
     module ForeignKey
-      extend ActiveSupport::Concern
+      # TODO: refactor and re-implement
 
-      class_methods do
+      # extend ActiveSupport::Concern
+
+      # class_methods do
         #
         # Explicitly specify a (bigint) foreign key
         #
-        def foreign_key(name, opts = {})
-          # TODO: refactor and re-implement
-          raise 'Not implemented'
+        # def foreign_key(name, opts = {})
+
+          # raise 'Not implemented'
 
           # opts = { as: :integer, limit: 8 }.merge(opts)
           # field(name, opts)
           # index(name)
-        end
+        # end
 
         # Redefines .belongs_to() with explicitly specified .foreign_key
         #
@@ -25,7 +27,7 @@ module Mimi
         #   # orig_belongs_to(name, opts)
         #   super
         # end
-      end
+      # end
     end # module ForeignKey
   end # module DB
 end # module Mimi

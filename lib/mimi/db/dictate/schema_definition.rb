@@ -31,6 +31,16 @@ module Mimi
           @columns[name] = Column.new(name, opts)
         end
 
+        # Declares an index
+        #
+        # Example:
+        #   index :name
+        #   index [:first_name, :last_name]
+        #   index :ref_code, unique: true
+        #
+        # @param columns [String,Symbol,Array<String,Symbol>] columns to index on
+        # @param opts [Hash] index parameters (:unique, :name etc)
+        #
         def index(columns, opts)
           case columns
           when String, Symbol
@@ -67,6 +77,8 @@ module Mimi
           }
         end
 
+        # Represents a column in schema definition
+        #
         class Column
           DEFAULT_TYPE = :string
 
@@ -120,6 +132,8 @@ module Mimi
           end
         end # class Column
 
+        # Represents an index in schema definition
+        #
         class Index
           DEFAULTS = {
             unique: false

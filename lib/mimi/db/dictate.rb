@@ -15,12 +15,12 @@ module Mimi
       def self.start
       end
 
+      # Returns all registered schema definitions
+      #
+      # @return [Hash] a map of <table_name> -> <schema_definition>
+      #
       def self.schema_definitions
         @schema_definitions ||= {}
-      end
-
-      def self.adapter_type
-        Mimi::DB.connection.adapter_scheme
       end
 
       # Updates the DB schema to the target schema defined in models

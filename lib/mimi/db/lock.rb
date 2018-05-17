@@ -49,6 +49,10 @@ module Mimi
       end
 
       def lock!(name, opts = {}, &block)
+        raise 'Not implemented'
+
+        # FIXME: migrate Mimi::DB::Lock to Sequel
+
         opts = Mimi::DB::Lock.module_options[:default_lock_options].merge(opts.dup)
         adapter_name = ActiveRecord::Base.connection.adapter_name.downcase.to_sym
         case adapter_name

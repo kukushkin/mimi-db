@@ -138,7 +138,8 @@ module Mimi
 
             float:      { db_type: 'double precision' }
           }
-        }
+        }.freeze
+
         #
         # The method infers column params based on column definition
         #

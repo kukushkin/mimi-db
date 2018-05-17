@@ -5,11 +5,6 @@ module Mimi
     module Dictate
       module SchemaDiff
         DEFAULT_OPTIONS = {
-          # Force updates on fields defined as :primary_key type.
-          # If disabled, the field definition will only be used in 'CREATE TABLE'.
-          # (forced updates on :primary_key break on Postgres, at least)
-          #
-          force_primary_key: false
         }.freeze
 
         #
@@ -18,7 +13,7 @@ module Mimi
         # @return [Hash] :columns, :indexes => :from, :to
         #
         def self.diff(from, to, opts = {})
-          options = DEFAULT_OPTIONS.merge(opts)
+          _options = DEFAULT_OPTIONS.merge(opts)
           result = { table_name: from.table_name, columns: {}, indexes: {} }
           all_column_names = (from.columns.values.map(&:name) + to.columns.values.map(&:name)).uniq
           all_column_names.each do |c|
