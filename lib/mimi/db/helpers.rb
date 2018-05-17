@@ -93,22 +93,7 @@ module Mimi
       # Creates the database specified in the current configuration.
       #
       def create!
-        raise "Not implemented"
-
-        db_adapter = Mimi::DB.active_record_config['adapter']
-        db_database = Mimi::DB.active_record_config['database']
-        slim_url = "#{db_adapter}//<host>:<port>/#{db_database}"
-        Mimi::DB.logger.info "Mimi::DB.create! creating database: #{slim_url}"
-        original_stdout = $stdout
-        original_stderr = $stderr
-        $stdout = StringIO.new
-        $stderr = StringIO.new
-        ActiveRecord::Tasks::DatabaseTasks.root = Mimi.app_root_path
-        ActiveRecord::Tasks::DatabaseTasks.create(Mimi::DB.active_record_config)
-        Mimi::DB.logger.debug "Mimi::DB.create! out:#{$stdout.string}, err:#{$stderr.string}"
-      ensure
-        $stdout = original_stdout
-        $stderr = original_stderr
+        raise 'Not implemented'
       end
 
       # Tries to establish connection, returns true if the database exist
@@ -134,7 +119,7 @@ module Mimi
       # Drops the database specified in the current configuration.
       #
       def drop!
-        raise "Not implemented"
+        raise 'Not implemented'
       end
 
       # Clears (but not drops) the database specified in the current configuration.
@@ -155,6 +140,17 @@ module Mimi
       def execute(statement, *args)
         sql = Sequel.fetch(statement, *args).sql
         Mimi::DB.connection.run(sql)
+      end
+
+      # Starts a transaction and executes a given block within the transaction
+      #
+      # @param params [Hash] parameters to Sequel #transaction() method
+      #
+      def transaction(params = {}, &_block)
+        unless Mimi::DB.connection
+          raise 'Failed to start transaction, Mimi::DB.connection not available'
+        end
+        Mimi::DB.connection.transaction(params) { yield }
       end
 
       # Executes a block with a given DB log level
