@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sequel/adapters/postgres'
 
 module Sequel
@@ -12,8 +14,8 @@ module Sequel
       end
 
       def server_version(*)
-        # 80000 # mimics Postgres v8
-        100000 # mimics Postgres v10
+        80000 # mimics Postgres v8
+        # 100000 # mimics Postgres v10
       end
 
       private
