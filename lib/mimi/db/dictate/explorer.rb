@@ -36,6 +36,7 @@ module Mimi
               primary_key: c[:primary_key],
               auto_increment: c[:auto_increment], # FIXME: SQLite does not report autoincremented fields
               null: c[:allow_null],
+              not_null: !c[:allow_null],
               db_default: c[:default],
               default: c[:default],
               db_type: c[:db_type]
