@@ -157,6 +157,9 @@ module Mimi
           idx_column_names = idx.columns.join(', ')
           logger.info "-- drop index: #{idx.name} on #{table_name}(#{idx_column_names})"
           return if dry_run?
+          drop_index_params = {}
+          drop_index_params[:name] = idx.name if idx.name
+          drop_index_params[:cascade] = true # TODO: always cascade?
           db_connection.drop_index(table_name, idx.columns)
         end
 
