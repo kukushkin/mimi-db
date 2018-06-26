@@ -160,7 +160,7 @@ module Mimi
           drop_index_params = {}
           drop_index_params[:name] = idx.name if idx.name
           drop_index_params[:cascade] = true # TODO: always cascade?
-          db_connection.drop_index(table_name, idx.columns)
+          db_connection.drop_index(table_name, idx.columns, drop_index_params)
         end
 
         def add_index!(table_name, idx)
