@@ -1,3 +1,3 @@
 # require 'sequel/adapters/sqlite'
 
-# Extensions to Postgres adapter
+# Extensions to Sqlite adapter

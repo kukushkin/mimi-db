@@ -25,7 +25,7 @@ module Mimi
     def self.module_manifest
       {
         db_adapter: {
-          desc: 'Database adapter ("sqlite3", "postgresql", "mysql" etc)',
+          desc: 'Database adapter ("sqlite3", "postgresql", "mysql", "cockroachdb" etc)',
           default: 'sqlite3'
         },
         db_database: {

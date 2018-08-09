@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # NOTE: mimi/db/lock is NOT required automatically on require "mimi/db"
 #
