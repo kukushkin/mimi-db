@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'dictate/dsl'
 require_relative 'dictate/schema_definition'
 require_relative 'dictate/schema_diff'

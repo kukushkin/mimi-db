@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Mimi
   module DB
     module ForeignKey
